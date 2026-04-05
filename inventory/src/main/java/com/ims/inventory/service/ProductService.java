@@ -39,7 +39,7 @@ public class ProductService {
 
             Product saved = productRepository.save(updatedProduct);
 
-            logService.logAction(
+            logService.log(
                     "STOCK_INCREASED",
                     saved.getProductId(),
                     oldQty,
@@ -53,7 +53,7 @@ public class ProductService {
 
             Product saved = productRepository.save(product);
 
-            logService.logAction(
+            logService.log(
                     "PRODUCT_ADDED",
                     saved.getProductId(),
                     0,
@@ -91,7 +91,7 @@ public class ProductService {
 
         Product saved = productRepository.save(product);
 
-        logService.logAction(
+        logService.log(
                 "STOCK_REDUCED",
                 saved.getProductId(),
                 oldQty,
@@ -118,7 +118,7 @@ public class ProductService {
 
         Product saved = productRepository.save(product);
 
-        logService.logAction(
+        logService.log(
                 "STOCK_ADDED",
                 saved.getProductId(),
                 oldQty,
@@ -173,7 +173,7 @@ public class ProductService {
 
         Product saved = productRepository.save(existing);
 
-        logService.logAction(
+        logService.log(
                 "PRODUCT_UPDATED",
                 saved.getProductId(),
                 oldQty,
@@ -189,7 +189,7 @@ public class ProductService {
 
         productRepository.deleteById(id);
 
-        logService.logAction(
+        logService.log(
                 "PRODUCT_DELETED",
                 id,
                 0,

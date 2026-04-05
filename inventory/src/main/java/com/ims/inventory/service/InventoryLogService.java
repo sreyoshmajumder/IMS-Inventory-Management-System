@@ -2,30 +2,23 @@ package com.ims.inventory.service;
 
 import com.ims.inventory.entity.InventoryLog;
 import com.ims.inventory.repository.InventoryLogRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Service
 public class InventoryLogService {
 
-    private final InventoryLogRepository logRepository;
+    @Autowired
+    private InventoryLogRepository inventoryLogRepository;
 
-    public InventoryLogService(InventoryLogRepository logRepository) {
-        this.logRepository = logRepository;
-    }
-
-    public void logAction(String action, Long productId, Integer oldQty, Integer newQty, String user) {
-
+    public void log(String action, Long productId, Integer oldQuantity,
+                    Integer newQuantity, String performedBy) {
         InventoryLog log = new InventoryLog();
-
         log.setAction(action);
         log.setProductId(productId);
-        log.setOldQuantity(oldQty);
-        log.setNewQuantity(newQty);
-        log.setPerformedBy(user);
-        log.setTimestamp(LocalDateTime.now());
-
-        logRepository.save(log);
+        log.setOldQuantity(oldQuantity);
+        log.setNewQuantity(newQuantity);
+        log.setUsername(performedBy);   // ✅ fixed line
+        inventoryLogRepository.save(log);
     }
 }

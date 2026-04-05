@@ -18,13 +18,12 @@ export default function Login() {
     setLoading(true)
     try {
       const { data } = await login(form)
-      signIn(data)
+      signIn(data, form.password) // pass raw password for Basic Auth
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data || 'Invalid credentials. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+      if (!err.response) setError('❌ Cannot connect to server. Make sure Spring Boot is running.')
+      else setError(err.response?.data?.message || 'Invalid credentials.')
+    } finally { setLoading(false) }
   }
 
   return (
@@ -35,52 +34,21 @@ export default function Login() {
           <div className="auth-title">Welcome back</div>
           <div className="auth-sub">Sign in to your inventory account</div>
         </div>
-
         {error && <div className="alert alert-error" style={{ marginBottom: 'var(--space-4)' }}>{error}</div>}
-
         <form className="auth-form" onSubmit={submit}>
           <div className="form-group">
-            <label className="form-label" htmlFor="username">Username</label>
-            <input
-              id="username"
-              className="form-input"
-              name="username"
-              value={form.username}
-              onChange={handle}
-              placeholder="Enter your username"
-              required
-              autoFocus
-              autoComplete="username"
-            />
+            <label className="form-label">Username</label>
+            <input className="form-input" name="username" value={form.username} onChange={handle} placeholder="Enter username" required autoFocus />
           </div>
-
           <div className="form-group">
-            <label className="form-label" htmlFor="password">Password</label>
-            <input
-              id="password"
-              className="form-input"
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handle}
-              placeholder="Enter your password"
-              required
-              autoComplete="current-password"
-            />
+            <label className="form-label">Password</label>
+            <input className="form-input" type="password" name="password" value={form.password} onChange={handle} placeholder="Enter password" required />
           </div>
-
-          <button
-            className="btn btn-primary"
-            style={{ width: '100%', justifyContent: 'center', padding: '0.625rem' }}
-            disabled={loading}
-          >
+          <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.625rem' }} disabled={loading}>
             {loading ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
-
-        <div className="auth-footer">
-          Don't have an account? <Link to="/register">Register here</Link>
-        </div>
+        <div className="auth-footer">Don't have an account? <Link to="/register">Register here</Link></div>
       </div>
     </div>
   )

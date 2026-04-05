@@ -1,10 +1,18 @@
 import axios from 'axios'
 
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({
+  baseURL: '/api'
+})
 
 // Auth
 export const login = (data) => api.post('/auth/login', data)
 export const register = (data) => api.post('/auth/register', data)
+
+// Users
+export const getUsers = () => api.get('/users')
+export const createUser = (data) => api.post('/users', data)
+export const updateUserRole = (id, role) => api.put(`/users/${id}/role`, { role })
+export const deleteUser = (id) => api.delete(`/users/${id}`)
 
 // Dashboard
 export const getDashboard = () => api.get('/dashboard')
@@ -19,7 +27,7 @@ export const searchProducts = (name) => api.get(`/products/search?name=${name}`)
 export const getLowStock = (qty) => api.get(`/products/low-stock?quantity=${qty}`)
 export const addStock = (id, qty) => api.put(`/products/${id}/add-stock?quantity=${qty}`)
 export const reduceStock = (id, qty) => api.put(`/products/${id}/reduce-stock?quantity=${qty}`)
-export const getTotalInventoryValue = () => api.get('/products/total-value')
+export const getProductsByPrice = (min, max) => api.get(`/products/price-range?min=${min}&max=${max}`)
 
 // Categories
 export const getCategories = () => api.get('/categories')
@@ -39,8 +47,18 @@ export const createOrder = (data) => api.post('/orders', data)
 export const updateOrder = (id, data) => api.put(`/orders/${id}`, data)
 export const deleteOrder = (id) => api.delete(`/orders/${id}`)
 
+// Logs
+export const getLogs = () => api.get('/logs')
+export const getLogsByProduct = (id) => api.get(`/logs/product/${id}`)
+
 // Reports
 export const getInventoryValueReport = () => api.get('/reports/inventory-value')
 export const getLowStockReport = (qty = 5) => api.get(`/products/low-stock?quantity=${qty}`)
+
+// Smart Assistant
+export const getSmartAlerts = () => api.get('/smart/alerts')
+export const getLowStockPredictions = () => api.get('/smart/low-stock-predictions')
+export const getDeadStock = () => api.get('/smart/dead-stock')
+export const getDemandAnalysis = () => api.get('/smart/demand-analysis')
 
 export default api
