@@ -11,9 +11,9 @@ const actionBadge = (action) => {
 }
 
 export default function Logs() {
-  const [logs, setLogs]       = useState([])
+  const [logs, setLogs] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch]   = useState('')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     getLogs()
@@ -22,9 +22,9 @@ export default function Logs() {
       .finally(() => setLoading(false))
   }, [])
 
-  const filtered = logs.filter(l =>
-    !search || JSON.stringify(l).toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = logs
+    .filter(l => !String(l.action || '').toUpperCase().startsWith('ORDER'))
+    .filter(l => !search || JSON.stringify(l).toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div>
@@ -32,18 +32,34 @@ export default function Logs() {
         <h1 className="page-title">Audit Logs</h1>
         <div className="search-bar">
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input className="search-input" placeholder="Search logs…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input
+            className="search-input"
+            placeholder="Search logs…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
       <div className="card">
-        {loading ? <div className="loading">Loading logs…</div> : (
+        {loading ? (
+          <div className="loading">Loading logs…</div>
+        ) : (
           <div className="table-wrap">
             <table>
               <thead>
-                <tr><th>#</th><th>Action</th><th>Product ID</th><th>Old Qty</th><th>New Qty</th><th>User</th><th>Timestamp</th></tr>
+                <tr>
+                  <th>#</th>
+                  <th>Action</th>
+                  <th>Product ID</th>
+                  <th>Old Qty</th>
+                  <th>New Qty</th>
+                  <th>User</th>
+                  <th>Timestamp</th>
+                </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
@@ -55,7 +71,7 @@ export default function Logs() {
                     <td>#{l.productId}</td>
                     <td style={{ color: 'var(--error)' }}>{l.oldQuantity ?? '—'}</td>
                     <td style={{ color: 'var(--success)' }}>{l.newQuantity ?? '—'}</td>
-                    <td style={{ fontWeight: 500 }}>{l.username || l.user || '—'}</td>
+                    <td style={{ fontWeight: 500 }}>{l.username || '—'}</td>
                     <td style={{ color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>
                       {l.timestamp ? new Date(l.timestamp).toLocaleString('en-IN') : '—'}
                     </td>

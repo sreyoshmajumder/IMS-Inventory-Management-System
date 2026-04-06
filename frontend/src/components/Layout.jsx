@@ -1,36 +1,44 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
+
+const allNav = [
+  { to: '/',           label: 'Dashboard',  icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg> },
+  { to: '/products',   label: 'Products',   icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg> },
+  { to: '/categories', label: 'Categories', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M4 12h16"/></svg> },
+  { to: '/suppliers',  label: 'Suppliers',  icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> },
+  { to: '/orders',     label: 'Orders',     icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> },
+  { to: '/reports',    label: 'Reports',    icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> },
+]
+
+const pageTitles = {
+  '/': 'Dashboard',
+  '/products': 'Products',
+  '/categories': 'Categories',
+  '/suppliers': 'Suppliers',
+  '/orders': 'Orders',
+  '/reports': 'Reports',
+}
 
 export default function Layout() {
-  const { user, signOut, isAdmin } = useAuth()
+  const { user, signOut } = useAuth()
   const location = useLocation()
-  const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches)
+  const [dark, setDark] = useState(() =>
+    document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'))
+  )
+
+  const role = String(user?.role || 'USER').replace('ROLE_', '').toUpperCase()
+  const isAdmin = role === 'ADMIN'
+
+  const nav = useMemo(() => {
+    if (isAdmin) return allNav
+    return allNav.filter(item => !['/categories', '/suppliers'].includes(item.to))
+  }, [isAdmin])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
   }, [dark])
-
-  const pageTitles = {
-    '/': 'Dashboard', '/products': 'Products', '/categories': 'Categories',
-    '/suppliers': 'Suppliers', '/orders': 'Orders', '/reports': 'Reports',
-    '/users': 'User Management', '/logs': 'Audit Logs', '/smart': 'Smart Assistant'
-  }
-
-  const navLinks = [
-    { to: '/', label: 'Dashboard', end: true, icon: '📊' },
-    { to: '/products',   label: 'Products',   icon: '📦' },
-    { to: '/categories', label: 'Categories', icon: '🗂️' },
-    { to: '/suppliers',  label: 'Suppliers',  icon: '🚚' },
-    { to: '/orders',     label: 'Orders',     icon: '🛒' },
-    { to: '/reports',    label: 'Reports',    icon: '📈' },
-    { to: '/smart',      label: 'Smart AI',   icon: '🧠' },
-  ]
-
-  const adminLinks = [
-    { to: '/users', label: 'Users',      icon: '👥' },
-    { to: '/logs',  label: 'Audit Logs', icon: '📜' },
-  ]
 
   return (
     <div className="app-shell">
@@ -45,24 +53,16 @@ export default function Layout() {
 
         <nav className="sidebar-nav">
           <span className="nav-label">Main</span>
-          {navLinks.map(({ to, label, icon, end }) => (
-            <NavLink key={to} to={to} end={end}
-              className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
-              <span>{icon}</span>{label}
+          {nav.map(({ to, label, icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}
+            >
+              {icon}{label}
             </NavLink>
           ))}
-
-          {isAdmin() && (
-            <>
-              <span className="nav-label" style={{ marginTop: 'var(--space-4)' }}>Admin</span>
-              {adminLinks.map(({ to, label, icon }) => (
-                <NavLink key={to} to={to}
-                  className={({ isActive }) => 'nav-link' + (isActive ? ' active' : '')}>
-                  <span>{icon}</span>{label}
-                </NavLink>
-              ))}
-            </>
-          )}
         </nav>
 
         <div className="sidebar-footer">
@@ -70,7 +70,7 @@ export default function Layout() {
             <div className="user-avatar">{user?.username?.[0]?.toUpperCase()}</div>
             <div className="user-info">
               <div className="user-name">{user?.username}</div>
-              <div className="user-role">{user?.role || 'USER'}</div>
+              <div className="user-role">{role}</div>
             </div>
             <button className="logout-btn" onClick={signOut} title="Logout">
               <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -87,18 +87,24 @@ export default function Layout() {
         <header className="topbar">
           <span className="topbar-title">{pageTitles[location.pathname] || 'IMS'}</span>
           <div className="topbar-right">
-            {isAdmin() && (
-              <span className="badge badge-blue" style={{ marginRight: 'var(--space-3)' }}>Admin</span>
-            )}
             <button className="theme-toggle" onClick={() => setDark(d => !d)} title="Toggle theme">
-              {dark
-                ? <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-              }
+              {dark ? (
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5"/>
+                  <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+              )}
             </button>
           </div>
         </header>
-        <main className="page-content"><Outlet /></main>
+
+        <main className="page-content">
+          <Outlet />
+        </main>
       </div>
     </div>
   )

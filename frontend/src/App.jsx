@@ -19,29 +19,32 @@ function ProtectedRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const { user, isAdmin } = useAuth()
+  const { user } = useAuth()
+  const role = String(user?.role || '').replace('ROLE_', '').toUpperCase()
   if (!user) return <Navigate to="/login" replace />
-  if (!isAdmin()) return <Navigate to="/" replace />
+  if (role !== 'ADMIN') return <Navigate to="/" replace />
   return children
 }
 
 function AppRoutes() {
   const { user } = useAuth()
+
   return (
     <Routes>
-      <Route path="/login"    element={user ? <Navigate to="/" replace /> : <Login />} />
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
+
       <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route index               element={<Dashboard />} />
-        <Route path="products"    element={<Products />} />
-        <Route path="categories"  element={<Categories />} />
-        <Route path="suppliers"   element={<Suppliers />} />
-        <Route path="orders"      element={<Orders />} />
-        <Route path="reports"     element={<Reports />} />
-        <Route path="smart"       element={<SmartAssistant />} />
-        {/* Admin Only */}
-        <Route path="users"  element={<AdminRoute><Users /></AdminRoute>} />
-        <Route path="logs"   element={<AdminRoute><Logs /></AdminRoute>} />
+        <Route index element={<Dashboard />} />
+        <Route path="products" element={<Products />} />
+        <Route path="orders" element={<Orders />} />
+        <Route path="reports" element={<Reports />} />
+        <Route path="smart" element={<SmartAssistant />} />
+
+        <Route path="categories" element={<AdminRoute><Categories /></AdminRoute>} />
+        <Route path="suppliers" element={<AdminRoute><Suppliers /></AdminRoute>} />
+        <Route path="users" element={<AdminRoute><Users /></AdminRoute>} />
+        <Route path="logs" element={<AdminRoute><Logs /></AdminRoute>} />
       </Route>
     </Routes>
   )
